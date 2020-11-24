@@ -6,3 +6,8 @@
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-quickstart-templates%2Fmaster%2F101-storage-blob-container%2Fazuredeploy.json" target="_blank">
   <img src="https://aka.ms/deploytoazurebutton"/>
 </a>
+
+<h1> One click deployment of Azure Data factory, Storage acount, and other resources of data factory </h1>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fassadullah96%2FAzureARMTemplates%2Fmain%2Farm_template.json
+" target="_blank">
+  <img src="https://aka.ms/deploytoazurebutton"/>
