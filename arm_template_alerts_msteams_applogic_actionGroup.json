@@ -22,11 +22,7 @@
              "description": "Location of the data factory. Currently, only East US, East US 2, and West Europe are supported."
             }
          },
-
-        "RestApiUrl": {
-            "type": "string",
-            "defaultValue": "https://services7.arcgis.com/LXCny1HyhQCUSueu/arcgis/rest/services/Definitive_Healthcare_USA_Hospital_Beds/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
-        },
+         
         "connection_name": {
             "defaultValue": "teams-7",
             "type": "String"
@@ -45,9 +41,8 @@
         }
     },
     "variables": {
-        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]",
-        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-        "factoryExternalId": "[resourceId('Microsoft.DataFactory/factories', parameters('factoryName'))]"
+        "factoryId": "[resourceId('Microsoft.DataFactory/factories/', parameters('factoryName'))]",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
     },
     "resources": [
 
@@ -411,7 +406,7 @@
                         "dependsOn": [],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 1,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -677,7 +672,7 @@
                                         "type": "Expression"
                                     },
                                     "container": {
-                                        "value": "@pipeline().Pipeline",
+                                        "value": "@pipeline().parameters.blobContainer",
                                         "type": "Expression"
                                     }
                                 }
@@ -690,7 +685,7 @@
                         "dependsOn": [],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 1,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -956,7 +951,7 @@
                                         "type": "Expression"
                                     },
                                     "container": {
-                                        "value": "@pipeline().Pipeline",
+                                        "value": "@pipeline().parameters.blobContainer",
                                         "type": "Expression"
                                     }
                                 }
@@ -1314,7 +1309,7 @@
                 "annotations": [],
                 "type": "RestService",
                 "typeProperties": {
-                    "url": "[parameters('RestApiUrl')]",
+                    "url": "https://services7.arcgis.com/LXCny1HyhQCUSueu/arcgis/rest/services/Definitive_Healthcare_USA_Hospital_Beds/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json",
                     "enableServerCertificateValidation": true,
                     "authenticationType": "Anonymous"
                 }
@@ -1397,14 +1392,14 @@
                 "severity": 0,
                 "enabled": true,
                 "scopes": [
-                    "[variables('factoryExternalId')]"
+                    "[variables('factoryId')]"
                 ],
                 "evaluationFrequency": "PT1M",
                 "windowSize": "PT1M",
                 "criteria": {
                     "allOf": [
                         {
-                            "threshold": 0,
+                            "threshold": 1,
                             "name": "PipelineCancelledRuns",
                             "metricNamespace": "Microsoft.DataFactory/factories",
                             "metricName": "PipelineCancelledRuns",
@@ -1456,7 +1451,7 @@
                 "severity": 0,
                 "enabled": true,
                 "scopes": [
-                    "[variables('factoryExternalId')]"
+                    "[variables('factoryId')]"
                 ],
                 "evaluationFrequency": "PT1M",
                 "windowSize": "PT1M",
@@ -1534,7 +1529,7 @@
                 "severity": 0,
                 "enabled": true,
                 "scopes": [
-                    "[variables('factoryExternalId')]"
+                    "[variables('factoryId')]"
                 ],
                 "evaluationFrequency": "PT1M",
                 "windowSize": "PT1M",
@@ -1593,7 +1588,7 @@
                 "severity": 0,
                 "enabled": true,
                 "scopes": [
-                    "[variables('factoryExternalId')]"
+                    "[variables('factoryId')]"
                 ],
                 "evaluationFrequency": "PT1M",
                 "windowSize": "PT1M",
@@ -1671,7 +1666,7 @@
                 "severity": 0,
                 "enabled": true,
                 "scopes": [
-                    "[variables('factoryExternalId')]"
+                    "[variables('factoryId')]"
                 ],
                 "evaluationFrequency": "PT1M",
                 "windowSize": "PT1M",
