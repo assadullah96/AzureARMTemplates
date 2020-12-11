@@ -27,6 +27,6 @@
   <img src="https://aka.ms/deploytoazurebutton"/>
 
 <h2> One click deployment for conditional Deployment </h2>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fassadullah96%2FAzureARMTemplates%2Fmain%2Fconditional_Deployment.json
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/assadullah96/AzureARMTemplates/main/conditional_Deployment.json
 " target="_blank">
   <img src="https://aka.ms/deploytoazurebutton"/>
