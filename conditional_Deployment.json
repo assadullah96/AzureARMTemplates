@@ -39,98 +39,75 @@
             "defaultValue": "assadullah@emumba.com",
             "type": "String"
         },
-        "sqlAdministratorLogin": {
+    
+        "databaseName": {
              "type": "string",
+             "defaultValue": "SampleDB",
              "metadata": {
-             "description": "The administrator username of the SQL Server."
+             "description": "The name of the SQL Database."
             }
         },
-        "sqlAdministratorLoginPassword": {
-             "type": "securestring",
-             "metadata": {
-             "description": "The administrator password of the SQL Server."
-            }
-         },
+        "sqlServerName": {
+           "type": "string",
+            "defaultValue": "sampleservertest",
+            "metadata": {
+            "description": "The name of the SQL server."
+            } 
+        },
 
-        "SinkDataToSql": {
+       "administratorLogin": {
+             "type": "string",
+             "metadata": {
+             "description": "The administrator username of the SQL logical server."
+             }
+        },
+       "administratorLoginPassword": {
+            "type": "securestring",
+             "metadata": {
+             "description": "The administrator password of the SQL logical server."
+              }
+        },
+       "SinkDataToSql": {
             "defaultValue": "Yes",
             "allowedValues": [ "Yes", "No" ],
             "type": "string",
             "metadata": {
                 "description": "Do you want to create sql database and server and write data to sqldb"
             }
-        },
-        "transparentDataEncryption": {
-            "type": "string",
-            "allowedValues": [
-                 "Enabled",
-                 "Disabled"
-            ],
-            "defaultValue": "Enabled",
-            "metadata": {
-            "description": "Enable or disable Transparent Data Encryption (TDE) for the database."
-            }
         }
     },
     "variables": {
         "factoryId": "[resourceId('Microsoft.DataFactory/factories/', parameters('factoryName'))]",
         "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-        "sqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
-        "databaseName": "db-for-sqlSink",
-        "databaseEdition": "Basic",
-        "databaseCollation": "SQL_Latin1_General_CP1_CI_AS",
-        "databaseServiceObjectiveName": "Basic"
+        "sinkToDb": "[equals(parameters('SinkDataToSql'),'Yes')]",
+        "fullyQualifiedDomainName": ".database.windows.net"
     },
     "resources": [  
         {
             "condition": "[equals(parameters('SinkDataToSql'),'Yes')]",
-            "name": "[variables('sqlServerName')]",
             "type": "Microsoft.Sql/servers",
             "apiVersion": "2020-02-02-preview",
+            "name": "[parameters('sqlServerName')]",
             "location": "[parameters('location')]",
-            "tags": {
-                "displayName": "SqlServer"
-            },
             "properties": {
-                "administratorLogin": "[parameters('sqlAdministratorLogin')]",
-                "administratorLoginPassword": "[parameters('sqlAdministratorLoginPassword')]",
-                "version": "12.0"
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]"
             },
             "resources": [
                 {
-                    "condition": "[equals(parameters('SinkDataToSql'),'Yes')]",
-                    "name": "[variables('databaseName')]",
-                    "type": "databases",
-                    "apiVersion": "2020-02-02-preview",
-                    "location": "[parameters('location')]",
-                    "tags": {
-                    "displayName": "Database"
-                    },
-                    "properties": {
-                    "edition": "[variables('databaseEdition')]",
-                    "collation": "[variables('databaseCollation')]",
-                    "requestedServiceObjectiveName": "[variables('databaseServiceObjectiveName')]"
-                    },
-                    "dependsOn": [
-                        "[variables('sqlServerName')]"
-                    ],
-                    "resources": [
-                        {
-                            "condition": "[equals(parameters('SinkDataToSql'),'Yes')]",
-                            "comments": "Transparent Data Encryption",
-                            "name": "current",
-                            "type": "transparentDataEncryption",
-                            "apiVersion": "2017-03-01-preview",
-                            "properties": {
-                                "status": "[parameters('transparentDataEncryption')]"
-                            },
-                            "dependsOn": [
-                                "[variables('databaseName')]"
-                            ]
-                        }      
-                    ]
+                "condition": "[equals(parameters('SinkDataToSql'),'Yes')]",
+                "type": "databases",
+                "apiVersion": "2020-08-01-preview",
+                "name": "[parameters('databaseName')]",
+                "location": "[parameters('location')]",
+                "sku": {
+                    "name": "Standard",
+                    "tier": "Standard"
                 },
-
+                "dependsOn": [
+                    "[parameters('sqlServerName')]"
+                ]
+                },
                 {
                     "condition": "[equals(parameters('SinkDataToSql'),'Yes')]",
                     "name": "AllowAllMicrosoftAzureIps",
@@ -142,12 +119,11 @@
                         "startIpAddress": "0.0.0.0"
                     },
                     "dependsOn": [
-                        "[variables('sqlServerName')]"
+                        "[parameters('sqlServerName')]"
                     ]
                 }   
-            ]   
-
-        },
+            ]
+         },
 
         {
             "type": "Microsoft.Storage/storageAccounts",
@@ -2517,9 +2493,7 @@
                 "annotations": [],
                 "type": "AzureSqlDatabase",
                 "typeProperties": {
-                    "connectionString": "[concat('Server=tcp:',reference(variables('sqlserverName'),'2020-02-02-preview','Full').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('databaseName'),';Persist Security Info=False;User ID=',reference(variables('sqlserverName'),'2020-02-02-preview','Full').administratorLogin,';Password=',parameters('sqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
-
-  
+                    "connectionString": "[concat('Server=tcp:',parameters('sqlServerName'), variables('fullyQualifiedDomainName'), ',1433;Initial Catalog=', parameters('databaseName'), ';User Id=', parameters('administratorLogin'), '@', parameters('sqlServerName'), ';Password=', parameters('administratorLoginPassword'), ';Trusted_Connection=False;Encrypt=True;Connection Timeout=30;MultipleActiveResultSets=True')]"
                 }
             },
             "dependsOn": [
@@ -3344,6 +3318,128 @@
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
                 },
                 "targetResourceType": "microsoft.datafactory/factories",
+                "actions": [
+                    {
+                        "actionGroupId": "[resourceId('microsoft.insights/actionGroups', parameters('actionGroupsName'))]",
+                        "webHookProperties": {}
+                    }
+                ]
+            }
+        },
+
+        {
+            "condition": "[equals(parameters('SinkDataToSql'),'No')]",
+            "type": "Microsoft.Insights/metricalerts",
+            "apiVersion": "2018-03-01",
+            "name": "AlertOnCancelTrigger_withoutsqlSink",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('microsoft.insights/actionGroups', parameters('actionGroupsName'))]"
+            ],
+            "properties": {
+                "description": "This alert will send notification when pipeline is cancelled by trigger",
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                    "[variables('factoryId')]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT1M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 1,
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.DataFactory/factories",
+                            "metricName": "TriggerCancelledRuns",
+                            "dimensions": [
+                                {
+                                    "name": "Name",
+                                    "operator": "Include",
+                                    "values": [
+                                        "Covid_Tracking"
+                                    ]
+                                },
+                                {
+                                    "name": "FailureType",
+                                    "operator": "Include",
+                                    "values": [
+                                        "UserError",
+                                        "SystemError",
+                                        "BadGateway"
+                                    ]
+                                }
+                            ],
+                            "operator": "GreaterThanOrEqual",
+                            "timeAggregation": "Average",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.DataFactory/factories",
+                "actions": [
+                    {
+                        "actionGroupId": "[resourceId('microsoft.insights/actionGroups', parameters('actionGroupsName'))]",
+                        "webHookProperties": {}
+                    }
+                ]
+            }
+        },
+        
+        {
+            "condition": "[equals(parameters('SinkDataToSql'),'No')]",
+            "type": "Microsoft.Insights/metricalerts",
+            "apiVersion": "2018-03-01",
+            "name": "AlertOnFailedTrigger_withoutSqlSink",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('microsoft.insights/actionGroups', parameters('actionGroupsName'))]"
+            ],
+            "properties": {
+                "description": "This alert will send notification when trigger is failed",
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                    "[variables('factoryId')]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT1M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 1,
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.DataFactory/factories",
+                            "metricName": "TriggerFailedRuns",
+                            "dimensions": [
+                                {
+                                    "name": "Name",
+                                    "operator": "Include",
+                                    "values": [
+                                        "Covid_Tracking"
+                                    ]
+                                },
+                                {
+                                    "name": "FailureType",
+                                    "operator": "Include",
+                                    "values": [
+                                        "UserError",
+                                        "SystemError",
+                                        "BadGateway"
+                                    ]
+                                }
+                            ],
+                            "operator": "GreaterThanOrEqual",
+                            "timeAggregation": "Average",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.DataFactory/factories",
                 "actions": [
                     {
                         "actionGroupId": "[resourceId('microsoft.insights/actionGroups', parameters('actionGroupsName'))]",
