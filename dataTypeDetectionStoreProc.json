@@ -80,7 +80,8 @@
         "factoryId": "[resourceId('Microsoft.DataFactory/factories/', parameters('factoryName'))]",
         "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
         "fullyQualifiedDomainName": ".database.windows.net",
-        "databaseCollation": "SQL_Latin1_General_CP1_CI_AS"
+        "databaseCollation": "SQL_Latin1_General_CP1_CI_AS",
+        "actionRuleForSuppressResolvedNotification": "AssadSuppressResolvedNotificationRule"
     },
     "resources": [  
         {
@@ -1719,7 +1720,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -1781,7 +1782,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -1976,7 +1977,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -2043,7 +2044,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -2902,7 +2903,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -2961,7 +2962,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3154,7 +3155,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3221,7 +3222,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3438,7 +3439,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3503,7 +3504,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3568,7 +3569,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3595,7 +3596,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3676,7 +3677,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3728,7 +3729,7 @@
                         ],
                         "policy": {
                             "timeout": "7.00:00:00",
-                            "retry": 0,
+                            "retry": 3,
                             "retryIntervalInSeconds": 30,
                             "secureOutput": false,
                             "secureInput": false
@@ -3933,6 +3934,35 @@
                 "[concat(variables('factoryId'), '/datasets/json_dataset')]",
                 "[resourceId('Microsoft.Logic/workflows', parameters('appLogicName'))]"
             ]
+        },
+
+        {
+            "type": "Microsoft.AlertsManagement/actionRules",
+            "apiVersion": "2019-05-05-preview",
+            "name": "[variables('actionRuleForSuppressResolvedNotification')]",
+            "location": "global",
+            "properties": {
+                "conditions": {
+                    "monitorCondition": {
+                        "operator": "Equals",
+                        "values": [
+                            "Resolved"
+                        ]
+                    }
+                },
+                "status": "Enabled",
+                "type": "Suppression",
+                "scope": {
+                    "scopeType": "ResourceGroup",
+                    "values": [
+                       "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name )]"
+                    ]
+                },
+                "suppressionConfig": {
+                    "recurrenceType": "Always"
+                },
+                "description": "This rule will supress the resolved notifications in email and ms teams"
+            }
         },
 
         {
