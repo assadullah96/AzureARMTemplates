@@ -4,7 +4,7 @@
   "parameters": {
        "factoryName": {
             "type": "string",
-            "defaultValue": "asadtestdatafactory",
+            "defaultValue": "dfactory",
             "metadata": {
              "description": "The name of data factory can contain only letters, numbers and hyphens. The first and last characters must be a letter or number. Spaces are not allowed."
             }
@@ -12,7 +12,7 @@
 
         "storageAccountName": {
              "type": "string",
-             "defaultValue": "asadteststrogeact",
+             "defaultValue": "storage",
              "metadata": {
              "description": "The storage account name can contain only lowercase letters and numbers. Name must be between 3 and 24 characters"
              }
@@ -63,14 +63,14 @@
     
         "databaseName": {
              "type": "string",
-             "defaultValue": "SampleDB",
+             "defaultValue": "sampledb",
              "metadata": {
              "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
             }
         },
         "sqlServerName": {
            "type": "string",
-            "defaultValue": "sampleservertest",
+            "defaultValue": "serverdb",
             "metadata": {
             "description": "Server name must be at least 3 characters and at most 63 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
             } 
