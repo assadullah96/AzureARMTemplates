@@ -105,7 +105,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/assadullah96/AzureLinkedTemplate/main/storageAccount.json",
+                    "uri": "https://raw.githubusercontent.com/assadullah96/AzureARMTemplates/main/AzureLinkedTemplate-main/storageAccount.json",
                     "contentVersion": "1.0.0.0"
                 },
                  "parameters": {
@@ -130,7 +130,7 @@
         "properties": {
         "mode": "Incremental",
         "templateLink": {
-            "uri": "https://raw.githubusercontent.com/assadullah96/AzureLinkedTemplate/main/appLogicActionRule.json",
+            "uri": "https://raw.githubusercontent.com/assadullah96/AzureARMTemplates/main/AzureLinkedTemplate-main/appLogicActionRule.json",
             "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -155,7 +155,7 @@
     "properties": {
       "mode": "Incremental",
       "templateLink": {
-        "uri": "https://raw.githubusercontent.com/assadullah96/AzureLinkedTemplate/main/dataFactory.json",
+        "uri": "https://raw.githubusercontent.com/assadullah96/AzureARMTemplates/main/AzureLinkedTemplate-main/dataFactory.json",
         "contentVersion": "1.0.0.0"
       },
       "parameters": {
@@ -211,7 +211,7 @@
     "properties": {
       "mode": "Incremental",
       "templateLink": {
-        "uri": "https://raw.githubusercontent.com/assadullah96/AzureLinkedTemplate/main/SqlServerandDb.json",
+        "uri": "https://raw.githubusercontent.com/assadullah96/AzureARMTemplates/main/AzureLinkedTemplate-main/SqlServerandDb.json",
         "contentVersion": "1.0.0.0"
       },
       "parameters": {
