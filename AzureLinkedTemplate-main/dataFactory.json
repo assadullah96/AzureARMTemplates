@@ -4297,7 +4297,7 @@
             ],
             "properties": {
                 "description": "It is to notify that the current schema of the source has less column(s) than the schema of the same source previously detected",
-                "severity": 1,
+                "severity": 0,
                 "enabled": true,
                 "scopes": [
                      "[variables('factoryId')]"
