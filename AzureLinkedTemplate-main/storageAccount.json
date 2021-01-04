@@ -4,14 +4,12 @@
   "parameters": {
      "storageAccountName": {
              "type": "string",
-             "defaultValue": "asadteststrogeact",
              "metadata": {
              "description": "The storage account name can contain only lowercase letters and numbers. Name must be between 3 and 24 characters"
              }
         },
     "location": {
              "type": "string",
-             "defaultValue": "eastus",
              "metadata": {
              "description": "Location of your resources. Default location is eastUS"
             }
