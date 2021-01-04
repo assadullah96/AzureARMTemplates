@@ -4,7 +4,6 @@
   "parameters": {
        "factoryName": {
             "type": "string",
-            "metadata": "Data Factory name",
             "metadata": {
              "description": "The name of data factory can contain only letters, numbers and hyphens. The first and last characters must be a letter or number. Spaces are not allowed."
              }
@@ -13,7 +12,7 @@
         "storageAccountName": {
              "type": "string",
              "metadata": {
-             "description": "The storage account name can contain only lowercase letters and numbers. Name must be between 3 and 24 characters"
+             "description": "The storage account name can contain only lowercase letters and numbers. Name must be between 1 and 11 characters."
              }
         },
 
@@ -50,20 +49,20 @@
             "allowedValues": [ "Yes", "No" ],
             "type": "string",
             "metadata": {
-                "description": "Do you want to create sql database and server and write data to sqldb"
+                "description": "Do you want to create sql database and server and write data to sqldb?"
             }
         },
     
         "databaseName": {
              "type": "string",
              "metadata": {
-             "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
+             "description": "Database name should not match special patterns,The value has a length of at most 115. Database name should not contain reserved words.No database with the same name exists in the server"
             }
         },
         "sqlServerName": {
            "type": "string",
             "metadata": {
-            "description": "Server name must be at least 3 characters and at most 63 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
+            "description": "Server name must be at least 1 characters and at most 52 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
             } 
         },
 
