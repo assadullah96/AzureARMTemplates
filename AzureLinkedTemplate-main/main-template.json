@@ -25,7 +25,7 @@
             }
          },
        
-        "connectionName": {
+        "connection_name": {
             "defaultValue": "teams-7",
             "type": "String",
             "metadata": {
