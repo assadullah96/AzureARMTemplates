@@ -5,7 +5,6 @@
        "factoryName": {
             "type": "string",
             "metadata": "Data Factory name",
-            "defaultValue": "asadtestdatafactory",
             "metadata": {
              "description": "The name of data factory can contain only letters, numbers and hyphens. The first and last characters must be a letter or number. Spaces are not allowed."
              }
@@ -13,7 +12,6 @@
         },
         "storageAccountName": {
              "type": "string",
-             "defaultValue": "asadteststrogeact",
              "metadata": {
              "description": "The storage account name can contain only lowercase letters and numbers. Name must be between 3 and 24 characters"
              }
@@ -21,14 +19,12 @@
 
         "location": {
              "type": "string",
-             "defaultValue": "eastus",
              "metadata": {
              "description": "Location of your resources. Default location is eastUS"
             }
          },
          
         "connection_name": {
-            "defaultValue": "teams-7",
             "type": "String",
             "metadata": {
              "description": "The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens."
@@ -36,25 +32,21 @@
         },
        
         "actionGroupsName": {
-            "defaultValue": "Assad",
             "type": "String",
             "metadata": {
              "description": "The name can contain letters, numbers, and special characters, this can start or end with any number, letter or other special charactor"
             }
         },
         "appLogicName": {
-            "defaultValue": "asadAlerts",
             "type": "String",
             "metadata": {
              "description": "The name can only contain letters, numbers, and '-', '(', ')', '_' or '.'"
             }
         },
         "emailForAlerts": {
-            "defaultValue": "assadullah@emumba.com",
             "type": "String"
         },
         "SinkDataToSql": {
-            "defaultValue": "Yes",
             "allowedValues": [ "Yes", "No" ],
             "type": "string",
             "metadata": {
@@ -64,14 +56,12 @@
     
         "databaseName": {
              "type": "string",
-             "defaultValue": "SampleDB",
              "metadata": {
              "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
             }
         },
         "sqlServerName": {
            "type": "string",
-            "defaultValue": "sampleservertest",
             "metadata": {
             "description": "Server name must be at least 3 characters and at most 63 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
             } 
