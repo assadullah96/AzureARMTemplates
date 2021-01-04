@@ -19,13 +19,13 @@
         "databaseName": {
              "type": "string",
              "metadata": {
-             "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
+             "description": "Database name should not match special patterns,The value has a length of at most 115. Database name should not contain reserved words.No database with the same name exists in the server"
             }
         },
         "sqlServerName": {
            "type": "string",
             "metadata": {
-            "description": "Server name must be at least 3 characters and at most 63 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
+            "description": "Server name must be at least 1 characters and at most 50 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
             } 
         },
 
