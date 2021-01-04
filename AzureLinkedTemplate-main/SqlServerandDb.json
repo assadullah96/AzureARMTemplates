@@ -3,7 +3,6 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
         "SinkDataToSql": {
-            "defaultValue": "Yes",
             "allowedValues": [ "Yes", "No" ],
             "type": "string",
             "metadata": {
@@ -12,7 +11,6 @@
         },
        "location": {
              "type": "string",
-             "defaultValue": "eastus",
              "metadata": {
              "description": "Location of your resources. Default location is eastUS"
             }
@@ -20,14 +18,12 @@
     
         "databaseName": {
              "type": "string",
-             "defaultValue": "SampleDB",
              "metadata": {
              "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
             }
         },
         "sqlServerName": {
            "type": "string",
-            "defaultValue": "sampleservertest",
             "metadata": {
             "description": "Server name must be at least 3 characters and at most 63 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
             } 
