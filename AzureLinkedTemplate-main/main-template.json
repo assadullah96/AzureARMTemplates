@@ -210,7 +210,7 @@
             },
             "currentTime":{
             "value": "[parameters('currentTime')]"
-            },
+            }
         
       }
     }
