@@ -77,6 +77,11 @@
              "metadata": {
              "description": "Your password must be at least 8 characters in length. It must be no more than 128 characters in length.Your password must contain characters from three of the following categories – English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.). Your password cannot contain all or part of the login name. Part of a login name is defined as three or more consecutive alphanumeric characters."
               }
+        },
+
+        "currentTime": {
+            "type": "string",
+            "defaultValue": "[utcNow('u')]"
         }
   },
   "variables": {
@@ -3753,7 +3758,7 @@
                     }
                 },
                 "folder": {
-                    "name": "CovidDefinitiveHC/BlobStorageDataExtraction"
+                    "name": "CovidDefinitiveHC/BlobStorageAndSqlDataExtraction"
                 },
                 "annotations": [],
                 "lastPublishTime": "2020-12-29T14:05:29Z"
@@ -3775,6 +3780,7 @@
         },
 
          {
+            "condition": "[equals(parameters('SinkDataToSql'),'No')]",
             "name": "[concat(parameters('factoryName'), '/DailyTrigger')]",
             "type": "Microsoft.DataFactory/factories/triggers",
             "apiVersion": "2018-06-01",
@@ -3803,13 +3809,53 @@
                     "recurrence": {
                         "frequency": "Hour",
                         "interval": 24,
-                        "startTime": "2021-01-05T07:22:00Z",
+                        "startTime": "[parameters('currentTime')]",
                         "timeZone": "UTC"
                     }
                 }
             },
             "dependsOn": [
                 "[concat(variables('factoryId'), '/pipelines/Covid_Tracking_DefinitiveHC_Without_Sql_Sink')]"
+            ]
+        },
+
+        {
+            "condition": "[equals(parameters('SinkDataToSql'),'Yes')]",
+            "name": "[concat(parameters('factoryName'), '/DailyTriggerForSqlPipeline')]",
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Daily trigger for the pipeline",
+                "annotations": [],
+                "runtimeState": "Started",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "Covid_Tracking_DefinitiveHC_With_Sql_Sink",
+                            "type": "PipelineReference"
+                        },
+                        "parameters": {
+                            "sourceFilename": "states_daily_4pm_et.csv",
+                            "sourceRelativeUrl": " ",
+                            "blobContainer": "public",
+                            "rawBlobDirectory": "raw/covid-19/covid_tracking",
+                            "curatedBlobDirectory": "curated/covid-19/covid_tracking",
+                            "filename": "covid_tracking"
+                        }
+                    }
+                ],
+                "type": "ScheduleTrigger",
+                "typeProperties": {
+                    "recurrence": {
+                        "frequency": "Hour",
+                        "interval": 24,
+                        "startTime": "[parameters('currentTime')]",
+                        "timeZone": "UTC"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/pipelines/Covid_Tracking_DefinitiveHC_With_Sql_Sink')]"
             ]
         },
 
