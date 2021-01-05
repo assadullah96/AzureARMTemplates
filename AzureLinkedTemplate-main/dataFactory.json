@@ -3774,6 +3774,45 @@
             ]
         },
 
+         {
+            "name": "[concat(parameters('factoryName'), '/DailyTrigger')]",
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "Daily trigger for the pipeline",
+                "annotations": [],
+                "runtimeState": "Started",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "Covid_Tracking_DefinitiveHC_Without_Sql_Sink",
+                            "type": "PipelineReference"
+                        },
+                        "parameters": {
+                            "sourceFilename": "states_daily_4pm_et.csv",
+                            "sourceRelativeUrl": " ",
+                            "blobContainer": "public",
+                            "rawBlobDirectory": "raw/covid-19/covid_tracking",
+                            "curatedBlobDirectory": "curated/covid-19/covid_tracking",
+                            "filename": "covid_tracking"
+                        }
+                    }
+                ],
+                "type": "ScheduleTrigger",
+                "typeProperties": {
+                    "recurrence": {
+                        "frequency": "Hour",
+                        "interval": 24,
+                        "startTime": "2021-01-05T07:22:00Z",
+                        "timeZone": "UTC"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/pipelines/Covid_Tracking_DefinitiveHC_Without_Sql_Sink')]"
+            ]
+        },
+
     {
             "name": "[concat(parameters('factoryName'), '/RestApiLinkedService')]",
             "type": "Microsoft.DataFactory/factories/linkedServices",
