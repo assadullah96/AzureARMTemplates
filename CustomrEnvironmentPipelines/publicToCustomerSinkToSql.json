@@ -1,0 +1,649 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "defaultValue": "asadtestdatafactory",
+            "metadata": {
+             "description": "The name of data factory can contain only letters, numbers and hyphens. The first and last characters must be a letter or number. Spaces are not allowed."
+             }
+
+        },
+        "storageAccountName": {
+             "type": "string",
+             "defaultValue": "asadteststrogeact",
+             "metadata": {
+             "description": "The storage account name can contain only lowercase letters and numbers. Name must be between 3 and 24 characters"
+             }
+        },
+
+        "location": {
+             "type": "string",
+             "defaultValue": "eastus",
+             "metadata": {
+             "description": "Location of your resources. Default location is eastUS"
+            }
+         },
+         "databaseName": {
+             "type": "string",
+             "defaultValue": "SampleDB",
+             "metadata": {
+             "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
+            }
+        },
+        "sqlServerName": {
+           "type": "string",
+            "defaultValue": "sampleservertest",
+            "metadata": {
+            "description": "Server name must be at least 3 characters and at most 63 characters. Server name must only contain lowercase letters, numbers, and hyphens. The server name must not start or end in a hyphen."
+            } 
+        },
+
+       "administratorLogin": {
+             "type": "string",
+             "metadata": {
+             "description": "Your login name must not contain a SQL Identifier or a typical system name (like admin, administrator, sa, root, dbmanager, loginmanager, etc.) or a built-in database user or role (like dbo, guest, public, etc.). "
+             }
+        },
+       "administratorLoginPassword": {
+            "type": "securestring",
+             "metadata": {
+             "description": "Your password must be at least 8 characters in length. It must be no more than 128 characters in length.Your password must contain characters from three of the following categories – English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.). Your password cannot contain all or part of the login name. Part of a login name is defined as three or more consecutive alphanumeric characters."
+              }
+        },
+        "AzureBlobStoragePublic_sasUri": {
+            "type": "secureString",
+            "defaultValue":"https://storagempg6srpf6upsa.blob.core.windows.net/?sv=2019-12-12&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-03-13T15:24:56Z&st=2021-01-06T07:24:56Z&spr=https,http&sig=c3bjnN1Iq0M6%2FQHFh%2FYIX9ZizrYJmZKo4Netz581uog%3D",
+            "metadata": "Secure string for 'sasUri' of 'AzureBlobStoragePublic'"
+        }
+    },
+    "variables": {
+        "factoryId": "[resourceId('Microsoft.DataFactory/factories/', parameters('factoryName'))]",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+        "fullyQualifiedDomainName": ".database.windows.net",
+        "databaseCollation": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                 "name": "Standard_LRS"
+                },
+            "kind": "StorageV2",
+            "properties": {}
+       },
+ 
+
+       {
+            "type": "Microsoft.DataFactory/factories",
+            "apiVersion": "2018-06-01",
+            "name": "[parameters('factoryName')]",
+            "location": "[parameters('location')]",
+            "properties": {},
+            "identity": {
+                "type": "SystemAssigned"
+                 }
+        },
+
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[parameters('sqlServerName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "version": "12.0"
+            },
+            "resources": [
+                {
+                "type": "databases",
+                "apiVersion": "2020-08-01-preview",
+                "name": "[parameters('databaseName')]",
+                "location": "[parameters('location')]",
+                "sku": {
+                    "name": "Basic",
+                    "tier": "Basic",
+                    "capacity":5
+                },
+                "properties": {
+                    "collation": "[variables('databaseCollation')]"
+                },
+                "dependsOn": [
+                    "[parameters('sqlServerName')]"
+                ]
+                },
+                {
+                    "name": "AllowAllMicrosoftAzureIps",
+                    "type": "firewallrules",
+                    "apiVersion": "2020-02-02-preview",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    },
+                    "dependsOn": [
+                        "[parameters('sqlServerName')]"
+                    ]
+                }   
+            ]
+         },
+        
+        
+        {
+            "name": "[concat(parameters('factoryName'), '/customerCovidTracking')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "CopyDataFromPublicToCustomer",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "DelimitedTextSource",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": true,
+                                    "wildcardFolderPath": "*",
+                                    "wildcardFileName": "*",
+                                    "enablePartitionDiscovery": false
+                                },
+                                "formatSettings": {
+                                    "type": "DelimitedTextReadSettings"
+                                }
+                            },
+                            "sink": {
+                                "type": "DelimitedTextSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "DelimitedTextWriteSettings",
+                                    "quoteAllText": true,
+                                    "fileExtension": ".txt"
+                                }
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "PublicBlobDataset",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "CustomerBlobDataset",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "covid_tracking",
+                        "type": "ExecuteDataFlow",
+                        "dependsOn": [
+                            {
+                                "activity": "CopyDataFromPublicToCustomer",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataflow": {
+                                "referenceName": "covid_tracking_transformation",
+                                "type": "DataFlowReference",
+                                "parameters": {},
+                                "datasetParameters": {
+                                    "sourceCSV": {
+                                        "container": "customer",
+                                        "directory": "curated/covid-19/covid_tracking/latest",
+                                        "file": "covid_tracking.csv"
+                                    },
+                                    "sinkSqlStaggingTable": {
+                                        "tablename": "staggingTable"
+                                    },
+                                    "sinkSqlOperationsTable": {}
+                                }
+                            },
+                            "staging": {},
+                            "compute": {
+                                "coreCount": 8,
+                                "computeType": "General"
+                            },
+                            "traceLevel": "Fine"
+                        }
+                    }
+                ],
+                "annotations": []
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/datasets/PublicBlobDataset')]",
+                "[concat(variables('factoryId'), '/datasets/CustomerBlobDataset')]",
+                "[concat(variables('factoryId'), '/dataflows/covid_tracking_transformation')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureBlobStorageCustomer')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=',listKeys(variables('storageAccountId'), '2019-06-01').keys[0].value)]"
+                }
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureBlobStoragePublic')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "sasUri": "[parameters('AzureBlobStoragePublic_sasUri')]"
+                }
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/PublicBlobDataset')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureBlobStoragePublic",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "public_container": {
+                        "type": "string",
+                        "defaultValue": "public"
+                    }
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "container": {
+                            "value": "@dataset().public_container",
+                            "type": "Expression"
+                        }
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "Row_Id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Load_Date",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Load_Time",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Longitude",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Latitude",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hospital_Name",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hospital_Type",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hq_Address",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hq_Address1",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hq_City",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hq_State",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Hq_Zip_Code",
+                        "type": "String"
+                    },
+                    {
+                        "name": "County_Name",
+                        "type": "String"
+                    },
+                    {
+                        "name": "State_Name",
+                        "type": "String"
+                    },
+                    {
+                        "name": "State_Fips",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Cnty_Fips",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Fips",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Num_Licensed_Beds",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Num_Staffed_Beds",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Num_Icu_Beds",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Adult_Icu_Beds",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Pedi_Icu_Beds",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Bed_Utilization",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Potential_Increase_In_Bed_Capac",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Avg_Ventilator_Usage",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragePublic')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/CustomerBlobDataset')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureBlobStorageCustomer",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "customer_container": {
+                        "type": "string",
+                        "defaultValue": "customer"
+                    }
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "container": {
+                            "value": "@dataset().customer_container",
+                            "type": "Expression"
+                        }
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageCustomer')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/covid_tracking_transformation')]",
+            "type": "Microsoft.DataFactory/factories/dataflows",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "folder": {
+                    "name": "transformations"
+                },
+                "type": "MappingDataFlow",
+                "typeProperties": {
+                    "sources": [
+                        {
+                            "dataset": {
+                                "referenceName": "source_csv_dataset",
+                                "type": "DatasetReference"
+                            },
+                            "name": "sourceCSV"
+                        }
+                    ],
+                    "sinks": [
+                        {
+                            "dataset": {
+                                "referenceName": "AzureSqlStagging",
+                                "type": "DatasetReference"
+                            },
+                            "name": "sinkSqlStaggingTable"
+                        },
+                        {
+                            "dataset": {
+                                "referenceName": "AzureSqlOperationsTable",
+                                "type": "DatasetReference"
+                            },
+                            "name": "sinkSqlOperationsTable"
+                        }
+                    ],
+                    "transformations": [],
+                    "script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tinferDriftedColumnTypes: true,\n\tpartitionBy('hash', 1)) ~> sourceCSV\nsourceCSV sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sinkSqlStaggingTable\nsourceCSV sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sinkSqlOperationsTable"
+                }
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/datasets/source_csv_dataset')]",
+                "[concat(variables('factoryId'), '/datasets/AzureSqlStagging')]",
+                "[concat(variables('factoryId'), '/datasets/AzureSqlOperationsTable')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/source_csv_dataset')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureBlobStorageCustomer",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "container": {
+                        "type": "string",
+                        "defaultValue": "customer"
+                    },
+                    "directory": {
+                        "type": "string",
+                        "defaultValue": "curated/covid-19/covid_tracking/latest"
+                    },
+                    "file": {
+                        "type": "string",
+                        "defaultValue": "covid_tracking.csv"
+                    }
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": {
+                            "value": "@dataset().file",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().directory",
+                            "type": "Expression"
+                        },
+                        "container": {
+                            "value": "@dataset().container",
+                            "type": "Expression"
+                        }
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageCustomer')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlDatabaseLinkedService')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "connectionString": "[concat('Server=tcp:',parameters('sqlServerName'), variables('fullyQualifiedDomainName'), ',1433;Initial Catalog=', parameters('databaseName'), ';User Id=', parameters('administratorLogin'), '@', parameters('sqlServerName'), ';Password=', parameters('administratorLoginPassword'), ';Trusted_Connection=False;Encrypt=True;Connection Timeout=30;MultipleActiveResultSets=True')]"
+                }
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlStagging')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabaseLinkedService",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "tablename": {
+                        "type": "string",
+                        "defaultValue": "staggingTable"
+                    }
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [],
+                "typeProperties": {
+                    "table": {
+                        "value": "@dataset().tablename",
+                        "type": "Expression"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabaseLinkedService')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlOperationsTable')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabaseLinkedService",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "tableName": {
+                        "type": "string",
+                        "defaultValue": "operationsTable"
+                    }
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [],
+                "typeProperties": {
+                    "table": {
+                        "value": "@dataset().tableName",
+                        "type": "Expression"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[parameters('storageAccountName')]",
+                "[parameters('factoryName')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabaseLinkedService')]"
+            ]
+        }
+    ]
+}
