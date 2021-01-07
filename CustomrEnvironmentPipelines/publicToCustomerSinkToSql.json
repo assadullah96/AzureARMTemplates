@@ -4,7 +4,7 @@
     "parameters": {
         "factoryName": {
             "type": "string",
-            "defaultValue": "asadtestdatafactory",
+            "defaultValue": "asadtestdatafactory2",
             "metadata": {
              "description": "The name of data factory can contain only letters, numbers and hyphens. The first and last characters must be a letter or number. Spaces are not allowed."
              }
@@ -27,7 +27,7 @@
          },
          "databaseName": {
              "type": "string",
-             "defaultValue": "SampleDB",
+             "defaultValue": "SampleDBs",
              "metadata": {
              "description": "Database name should not match special patterns,The value has a length of at most 128. Database name should not contain reserved words.No database with the same name exists in the server"
             }
